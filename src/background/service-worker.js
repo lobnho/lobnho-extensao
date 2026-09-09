@@ -11,6 +11,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       filename: message.filename,
       saveAs: false
     }, (downloadId) => {
+      const error = chrome.runtime.lastError;
+      if (error || typeof downloadId !== 'number') {
+        sendResponse({
+          success: false,
+          error: error ? error.message : 'Browser did not create download'
+        });
+        return;
+      }
       sendResponse({ success: true, downloadId });
     });
     return true;

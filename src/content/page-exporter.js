@@ -480,8 +480,9 @@
     static async _triggerDownload(blob, filename) {
       try {
         const reader = new FileReader();
-        const dataUrl = await new Promise((resolve) => {
+        const dataUrl = await new Promise((resolve, reject) => {
           reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error || new Error('Could not create download data'));
           reader.readAsDataURL(blob);
         });
 
