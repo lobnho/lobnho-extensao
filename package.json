@@ -1,0 +1,31 @@
+{
+  "name": "lobnho-extensao",
+  "version": "1.1.7",
+  "description": "Lobnho Extension — browser developer and designer utility with Target Cursor tracker and multi-format page exporter",
+  "main": "extension/manifest.json",
+  "scripts": {
+    "postinstall": "node scripts/setup-vendor.js",
+    "test": "node tests/test-syntax.js && node tests/test-manifest.js && node tests/test-generators.js",
+    "test:syntax": "node tests/test-syntax.js",
+    "test:manifest": "node tests/test-manifest.js",
+    "test:generators": "node tests/test-generators.js",
+    "install:browser": "powershell -NoProfile -ExecutionPolicy Bypass -File ./install-extension.ps1",
+    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./install-extension.ps1 -Dev"
+  },
+  "keywords": [
+    "browser-extension",
+    "manifest-v3",
+    "orkut",
+    "target-cursor",
+    "figma-export",
+    "css-inspector",
+    "react-jsx",
+    "tailwind"
+  ],
+  "author": "Lobinho Dev Team",
+  "license": "MIT",
+  "dependencies": {
+    "gsap": "^3.12.7",
+    "jszip": "^3.10.1"
+  }
+}

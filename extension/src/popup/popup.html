@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Lobnho Extension</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="orkut-popup-card">
+    <!-- Header -->
+    <header class="orkut-popup-header">
+      <div class="orkut-logo-title">
+        <img class="orkut-logo-icon" src="../../assets/LOBINHOLOGO.png" alt="Lobnho">
+        <h1>Lobnho <span>Extension</span></h1>
+      </div>
+      <span class="orkut-version">v1.1.7</span>
+    </header>
+
+    <!-- User Profile Bar -->
+    <div class="orkut-profile-bar">
+      <div class="orkut-avatar">
+        <img src="../../assets/LOBINHOLOGO.png" alt="Lobnho">
+      </div>
+      <div class="orkut-profile-info">
+        <div class="orkut-profile-name">Lobnho</div>
+      </div>
+    </div>
+
+    <!-- Main Actions -->
+    <div class="orkut-actions-container">
+      <button class="orkut-btn-primary" id="btn-toggle-tracker">
+        <span class="orkut-icon">🎯</span>
+        <span id="tracker-status-text">Inspecionar elemento</span>
+      </button>
+
+      <button class="orkut-btn-secondary" id="btn-export-page">
+        <span class="orkut-icon">📥</span>
+        <span>Salvar Página Completa (.html)</span>
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="orkut-popup-footer">
+      <span class="orkut-heart">Lobnho ❤️</span>
+    </footer>
+  </div>
+
+  <script src="../shared/browser-api.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

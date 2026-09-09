@@ -1,0 +1,92 @@
+/* Target Cursor Styles - React Bits Port for Lobnho Extension */
+
+.target-cursor-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 2147483647;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.target-cursor-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  background: #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.target-cursor-corner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-color: #ffffff;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.target-cursor-corner.corner-tl {
+  border-top: 3px solid #ffffff;
+  border-left: 3px solid #ffffff;
+}
+
+.target-cursor-corner.corner-tr {
+  border-top: 3px solid #ffffff;
+  border-right: 3px solid #ffffff;
+}
+
+.target-cursor-corner.corner-br {
+  border-bottom: 3px solid #ffffff;
+  border-right: 3px solid #ffffff;
+}
+
+.target-cursor-corner.corner-bl {
+  border-bottom: 3px solid #ffffff;
+  border-left: 3px solid #ffffff;
+}
+
+/* Orkut Glow Accent on Target Lock-on */
+.target-cursor-active .target-cursor-corner {
+  border-color: #ED2590 !important;
+  filter: drop-shadow(0 0 4px #ED2590);
+}
+
+.target-cursor-active .target-cursor-dot {
+  background-color: #ED2590 !important;
+  box-shadow: 0 0 8px #ED2590;
+}
+
+/* Floating element tag badge next to cursor */
+.target-cursor-badge {
+  position: absolute;
+  left: 20px;
+  top: -24px;
+  background: #3B5998;
+  color: #ffffff;
+  font-family: 'Trebuchet MS', Verdana, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #ED2590;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.target-cursor-active .target-cursor-badge {
+  opacity: 1;
+}

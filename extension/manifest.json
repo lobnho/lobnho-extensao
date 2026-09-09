@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Lobnho Extension — Inspector & Exporter",
+  "version": "1.1.7",
+  "description": "Lobnho element inspector, visual tracker, and multi-format page exporter for Figma and Adobe workflows.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Lobnho Extension",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/shared/vendor/gsap.min.js",
+        "src/shared/vendor/jszip.min.js",
+        "src/shared/browser-api.js",
+        "src/shared/logger.js",
+        "src/shared/code-generators.js",
+        "src/content/target-cursor.js",
+        "src/content/inspector-modal.js",
+        "src/content/page-exporter.js",
+        "src/content/content-main.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*",
+        "src/content/target-cursor.css",
+        "src/content/inspector-modal.css",
+        "src/shared/vendor/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  }
+}

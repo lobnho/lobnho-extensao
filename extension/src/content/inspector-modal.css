@@ -1,0 +1,276 @@
+/* Lobnho Inspector Modal Styles */
+
+:host {
+  all: initial;
+  font-family: 'Trebuchet MS', Verdana, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #222222;
+  z-index: 2147483646;
+}
+
+.orkut-inspector-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 540px;
+  max-width: calc(100vw - 48px);
+  max-height: 82vh;
+  background: #E7EEF6;
+  border: 2px solid #3B5998;
+  border-radius: 8px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2147483646;
+  box-sizing: border-box;
+}
+
+/* Header */
+.orkut-header {
+  background: linear-gradient(180deg, #4B6FA9 0%, #3B5998 60%, #29487D 100%);
+  color: #ffffff;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  border-bottom: 2px solid #ED2590;
+}
+
+.orkut-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.orkut-brand-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+}
+
+.orkut-tag-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  cursor: pointer;
+  user-select: all;
+  transition: all 0.15s ease;
+}
+
+.orkut-tag-badge:hover {
+  background: #ED2590;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(237, 37, 144, 0.6);
+}
+
+.orkut-btn-cursor {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-radius: 4px;
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.orkut-btn-cursor:hover {
+  background: #ED2590;
+  border-color: #ED2590;
+}
+
+.orkut-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.orkut-btn-header {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.15s ease;
+}
+
+.orkut-btn-header:hover {
+  background: #ED2590;
+  border-color: #ED2590;
+}
+
+/* Tab Bar */
+.orkut-tab-bar {
+  background: #E7EEF6;
+  display: flex;
+  overflow-x: auto;
+  padding: 6px 8px 0 8px;
+  gap: 4px;
+  border-bottom: 1px solid #C4D8EE;
+  scrollbar-width: thin;
+}
+
+.orkut-tab {
+  background: #D5E4F3;
+  color: #3B5998;
+  border: 1px solid #C4D8EE;
+  border-bottom: none;
+  padding: 6px 10px;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.orkut-tab:hover {
+  background: #ffffff;
+}
+
+.orkut-tab.active {
+  background: #ffffff;
+  color: #ED2590;
+  border-top: 2px solid #ED2590;
+  margin-bottom: -1px;
+  font-weight: bold;
+}
+
+/* Tab Content Area */
+.orkut-content-area {
+  flex: 1;
+  background: #ffffff;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+.orkut-code-box {
+  background: #FAFAFA;
+  border: 1px solid #D5E4F3;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #29487D;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.orkut-assets-box {
+  font-family: 'Trebuchet MS', Verdana, Arial, sans-serif;
+  word-break: normal;
+}
+
+.orkut-asset-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  margin-bottom: 6px;
+  border: 1px solid #D5E4F3;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.orkut-asset-row a {
+  color: #3B5998;
+  text-decoration: underline;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.orkut-asset-row a:hover {
+  color: #ED2590;
+}
+
+.orkut-empty {
+  color: #777777;
+}
+
+/* Action Footer */
+.orkut-footer {
+  background: #E7EEF6;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #C4D8EE;
+}
+
+.orkut-btn-copy {
+  background: linear-gradient(180deg, #FF459B 0%, #ED2590 60%, #D42880 100%);
+  color: #ffffff;
+  border: 1px solid #B01865;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(237, 37, 144, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.orkut-btn-copy:hover {
+  background: #FF5DAA;
+  transform: translateY(-1px);
+}
+
+.orkut-btn-secondary {
+  background: #3B5998;
+  color: #ffffff;
+  border: 1px solid #29487D;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.orkut-btn-secondary:hover {
+  background: #4B6FA9;
+}
+
+/* Toast feedback */
+.orkut-toast {
+  position: absolute;
+  top: 48px;
+  right: 16px;
+  background: #ED2590;
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.orkut-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
