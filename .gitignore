@@ -1,12 +1,3 @@
-# Dependencies
-node_modules/
-package-lock.json
-
-# Logs & temp files
-*.log
-*.tmp
-build-logs/
-
 # Operating System
 .DS_Store
 Thumbs.db
@@ -18,10 +9,6 @@ Thumbs.db
 *.sublime-project
 *.sublime-workspace
 
-# Internal Development Scratch Notes
-PROMPT_FOR_AGENT.md
-TASK_EXECUTION_PLAN.md
-tests/audit-svg.js
-publish-github.*
-push.bat
-
+# Logs & temp files
+*.log
+*.tmp
