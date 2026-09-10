@@ -61,6 +61,20 @@
           return true;
         }
 
+        if (message.action === 'export-theme') {
+          if (global.LobnhoThemeExporter) {
+            global.LobnhoThemeExporter.exportTheme()
+              .then((themeData) => sendResponse({ success: true, themeData }))
+              .catch((error) => {
+                logger.error('Theme export failed', error);
+                sendResponse({ success: false, error: error && error.message ? error.message : 'Theme export failed' });
+              });
+          } else {
+            sendResponse({ success: false, error: 'Theme exporter module not loaded' });
+          }
+          return true;
+        }
+
         if (message.action === 'get-status') {
           sendResponse({
             isTrackerEnabled: targetCursor.isEnabled

@@ -6,7 +6,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   const browserApi = window.LobnhoBrowser;
   const btnToggle = document.getElementById('btn-toggle-tracker');
   const btnExport = document.getElementById('btn-export-page');
+  const btnExportTheme = document.getElementById('btn-export-theme');
   const trackerText = document.getElementById('tracker-status-text');
+  const updateBox = document.getElementById('extension-update');
+  const updateText = document.getElementById('extension-update-text');
+  const updateLink = document.getElementById('extension-update-link');
+  const installedVersion = '1.1.8';
+  const versionEndpoint = 'https://lobinho.eu/extension/version.json';
+
+  async function checkForUpdate() {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+      const response = await fetch(`${versionEndpoint}?v=${Date.now()}`, { cache: 'no-store', signal: controller.signal });
+      clearTimeout(timeout);
+      if (!response.ok) return;
+      const release = await response.json();
+      if (release.version && release.version !== installedVersion && release.downloadUrl) {
+        updateText.textContent = `Nova versão disponível: v${release.version}`;
+        updateLink.href = release.releaseUrl || release.downloadUrl;
+        updateBox.hidden = false;
+      }
+    } catch {
+      // Update checks are optional and must not block extension actions.
+    }
+  }
 
   let activeTabId = null;
 
@@ -24,6 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       return browserApi.tabs.sendMessage(activeTabId, message);
     }
   }
+
+  checkForUpdate();
 
   const tab = await getActiveTab();
   if (tab) {
@@ -82,4 +108,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert(`Não foi possível exportar a página nesta aba.${reason}`);
     }
   });
+
+  if (btnExportTheme) {
+    btnExportTheme.addEventListener('click', async () => {
+      if (!activeTabId) return;
+      btnExportTheme.disabled = true;
+      const originalText = btnExportTheme.textContent;
+      btnExportTheme.textContent = 'Extraindo tema...';
+      try {
+        const response = await sendToActiveTab({ action: 'export-theme' });
+        if (!response || response.success !== true) {
+          throw new Error(response && response.error ? response.error : 'Content script indisponível');
+        }
+        btnExportTheme.textContent = 'Tema JSON exportado!';
+        setTimeout(() => {
+          window.close();
+        }, 800);
+      } catch (err) {
+        btnExportTheme.disabled = false;
+        btnExportTheme.textContent = originalText;
+        const reason = err && err.message ? `\n\nDetalhe: ${err.message}` : '';
+        alert(`Não foi possível exportar o tema nesta aba.${reason}`);
+      }
+    });
+  }
 });

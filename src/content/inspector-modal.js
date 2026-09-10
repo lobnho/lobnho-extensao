@@ -208,6 +208,124 @@
       }[character]));
     }
 
+    _extractFontFamilies(fontFamily) {
+      return String(fontFamily || '')
+        .split(',')
+        .map((family) => family.trim().replace(/^['"]|['"]$/g, ''))
+        .filter(Boolean);
+    }
+
+    _extractFontDetails(element, style) {
+      const fontFamilies = this._extractFontFamilies(style.fontFamily);
+      const activeFonts = [];
+      const fontFaceUrls = [];
+      const googleFontLinks = [];
+
+      // Find Google Fonts link in head
+      Array.from(document.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]')).forEach((link) => {
+        const href = link.getAttribute('href') || '';
+        if (href.includes('fonts.googleapis.com') || href.includes('fonts.gstatic.com')) {
+          googleFontLinks.push(href);
+        }
+      });
+
+      // Find matching @font-face rules and their src URLs
+      const familyNamesSet = new Set(fontFamilies.map((f) => f.toLowerCase()));
+      const visitRules = (styleSheet) => {
+        let cssRules;
+        try { cssRules = styleSheet.cssRules; } catch { return; }
+        if (!cssRules) return;
+        Array.from(cssRules).forEach((rule) => {
+          if (rule.type === CSSRule.FONT_FACE_RULE) {
+            const family = (rule.style.getPropertyValue('font-family') || '').trim().replace(/^['"]|['"]$/g, '');
+            if (familyNamesSet.has(family.toLowerCase())) {
+              const src = rule.style.getPropertyValue('src') || '';
+              const urlMatches = src.match(/url\((['"]?)(.*?)\1\)/gi) || [];
+              urlMatches.forEach((m) => {
+                const cleanUrl = m.replace(/^url\((['"]?)/i, '').replace(/\1\)$/, '');
+                if (cleanUrl && !fontFaceUrls.includes(cleanUrl)) fontFaceUrls.push(cleanUrl);
+              });
+            }
+          } else if (rule.cssRules) {
+            visitRules(rule);
+          }
+        });
+      };
+      Array.from(document.styleSheets || []).forEach(visitRules);
+
+      // Check document.fonts for loaded status
+      fontFamilies.forEach((family) => {
+        let isLoaded = false;
+        if (document.fonts) {
+          try {
+            isLoaded = document.fonts.check(`${style.fontStyle || 'normal'} ${style.fontWeight || '400'} 16px "${family}"`);
+          } catch {
+            isLoaded = false;
+          }
+          if (!isLoaded && document.fonts.size) {
+            for (const fontFace of document.fonts) {
+              if (fontFace.family.replace(/^['"]|['"]$/g, '').toLowerCase() === family.toLowerCase()) {
+                if (fontFace.status === 'loaded') {
+                  isLoaded = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        const isSystem = ['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy', 'system-ui', '-apple-system', 'blinkmacsystemfont'].includes(family.toLowerCase());
+        activeFonts.push({
+          name: family,
+          isLoaded,
+          isSystem
+        });
+      });
+
+      return {
+        activeFonts,
+        fontFaceUrls,
+        googleFontLinks: [...new Set(googleFontLinks)]
+      };
+    }
+
+    _extractLoadedFonts(fontFamilies) {
+      if (!document.fonts || !fontFamilies.length) return [];
+      const loaded = [];
+      fontFamilies.forEach((family) => {
+        try {
+          if (document.fonts.check(`16px "${family}"`)) loaded.push(family);
+        } catch {
+          // Ignore invalid font names from browser-specific computed styles.
+        }
+      });
+      return loaded;
+    }
+
+    _extractFontFaceRules(fontFamilies) {
+      if (!fontFamilies.length) return [];
+      const rules = [];
+      const familyNames = new Set(fontFamilies.map((family) => family.toLowerCase()));
+      const visitRules = (styleSheet) => {
+        let cssRules;
+        try {
+          cssRules = styleSheet.cssRules;
+        } catch {
+          return;
+        }
+        if (!cssRules) return;
+        Array.from(cssRules).forEach((rule) => {
+          if (rule.type === CSSRule.FONT_FACE_RULE) {
+            const family = rule.style.getPropertyValue('font-family').trim().replace(/^['"]|['"]$/g, '');
+            if (familyNames.has(family.toLowerCase())) rules.push(rule.cssText);
+          } else if (rule.cssRules) {
+            visitRules(rule);
+          }
+        });
+      };
+      Array.from(document.styleSheets || []).forEach(visitRules);
+      return [...new Set(rules)];
+    }
+
     _extractAllData(element) {
       if (!element) return;
       const generators = global.LobnhoCodeGenerators || {};
@@ -238,11 +356,27 @@
         `font-family: ${style.fontFamily};`,
         `font-size: ${style.fontSize};`,
         `font-weight: ${style.fontWeight};`,
+        `font-style: ${style.fontStyle};`,
+        `font-stretch: ${style.fontStretch};`,
         `line-height: ${style.lineHeight};`,
         `letter-spacing: ${style.letterSpacing};`,
         `text-transform: ${style.textTransform};`,
         `box-shadow: ${style.boxShadow};`
       ].filter(line => !line.includes(': none') && !line.includes(': 0px 0px') && !line.includes(': auto;'));
+
+      const fontDetails = this._extractFontDetails(element, style);
+      cssRules.push('', '/* Typography & Font Detection */');
+      fontDetails.activeFonts.forEach((f) => {
+        cssRules.push(`font-family-check: "${f.name}" -> Loaded: ${f.isLoaded ? 'YES' : 'NO'}${f.isSystem ? ' (System Font)' : ' (Web Font)'}`);
+      });
+      if (fontDetails.fontFaceUrls.length) {
+        cssRules.push('/* WebFont @font-face URLs */');
+        fontDetails.fontFaceUrls.forEach((u) => cssRules.push(`font-url: ${u}`));
+      }
+      if (fontDetails.googleFontLinks.length) {
+        cssRules.push('/* Google Fonts Links */');
+        fontDetails.googleFontLinks.forEach((l) => cssRules.push(`google-font: ${l}`));
+      }
       this.tabsData.css = cssRules.join('\n');
 
       // 4. React JSX

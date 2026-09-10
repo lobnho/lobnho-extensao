@@ -148,6 +148,23 @@ button {
 }
 
 /* Footer */
+.orkut-update {
+  margin: 10px 14px 0;
+  padding: 8px 10px;
+  border: 1px solid #ff00f655;
+  border-radius: 8px;
+  color: #ffd7fb;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.orkut-update a {
+  display: block;
+  margin-top: 4px;
+  color: #ff98fb;
+  font-weight: 700;
+}
+
 .orkut-popup-footer {
   background: #E7EEF6;
   padding: 8px 14px;
