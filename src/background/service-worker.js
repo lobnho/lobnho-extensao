@@ -23,7 +23,8 @@ async function checkReleaseBadge() {
     const release = await response.json();
     const current = chrome.runtime.getManifest().version.split('.').map(Number);
     const remote = String(release.version || '').split('.').map(Number);
-    const newer = remote.length === 3 && remote.some((value, index) => value > (current[index] || 0)) && remote.every((value, index) => value >= (current[index] || 0));
+    const firstDifference = [0, 1, 2].find((index) => remote[index] !== (current[index] || 0));
+    const newer = remote.length === 3 && remote.every(Number.isFinite) && firstDifference !== undefined && remote[firstDifference] > (current[firstDifference] || 0);
     await chrome.action.setBadgeText({ text: newer ? 'NEW' : '' });
     if (newer) await chrome.action.setBadgeBackgroundColor({ color: '#ED2590' });
   } catch (_) {
