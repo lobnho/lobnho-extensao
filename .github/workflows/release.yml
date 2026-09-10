@@ -1,0 +1,36 @@
+﻿name: Release Extension Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Clean ZIP Distribution Package
+        run: |
+          mkdir -p dist
+          zip -r dist/lobnho-extension.zip manifest.json package.json LICENSE README.md assets src -x "*.git*"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/lobnho-extension.zip
+          name: Lobnho Extension ${{ github.ref_name }}
+          body: |
+            Official build package for **Lobnho Extension ${{ github.ref_name }}**.
+            
+            ### 📥 Quick Links
+            - **Web Portal & Guides**: [https://lobinho.eu/extension/](https://lobinho.eu/extension/)
+            - **1-Click Auto-Update Package**: [Download CRX](https://lobinho.eu/extension/downloads/lobnho-extension.crx)
+            - **ZIP Package**: Attached below as `lobnho-extension.zip`
+          draft: false
+          prerelease: false

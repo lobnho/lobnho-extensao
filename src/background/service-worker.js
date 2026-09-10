@@ -1,32 +1,22 @@
-/**
- * Lobnho Extension - Service Worker (Background)
- * Manifest V3 background service worker for commands and dispatch.
- */
-
 const UPDATE_ALARM = 'lobnho-extension-update-check';
 const UPDATE_INTERVAL_MINUTES = 60;
+const RELEASE_URL = 'https://lobinho.eu/extension/version.json';
 
 function setUpdateBadge(text) {
   chrome.action.setBadgeText({ text }).catch(() => {});
   if (text) chrome.action.setBadgeBackgroundColor({ color: '#ff00f6' }).catch(() => {});
 }
-const RELEASE_URL = 'https://lobinho.eu/extension/version.json';
-
 function scheduleUpdateCheck() {
   chrome.alarms.create(UPDATE_ALARM, { delayInMinutes: UPDATE_INTERVAL_MINUTES, periodInMinutes: UPDATE_INTERVAL_MINUTES });
 }
-
 function requestBrowserUpdate() {
   try {
     chrome.runtime.requestUpdateCheck((status) => {
       void chrome.runtime.lastError;
-      setUpdateBadge(status === 'update_available' ? 'NEW' : '');
+      if (status === 'update_available') setUpdateBadge('NEW');
     });
-  } catch (_) {
-    // Browser may reject update checks while offline or during startup.
-  }
+  } catch (_) {}
 }
-
 async function checkReleaseBadge() {
   try {
     const response = await fetch(`${RELEASE_URL}?v=${Date.now()}`, { cache: 'no-store' });
@@ -38,40 +28,26 @@ async function checkReleaseBadge() {
     const newer = remote.length === 3 && remote.every(Number.isFinite) && firstDifference !== undefined && remote[firstDifference] > (current[firstDifference] || 0);
     await chrome.action.setBadgeText({ text: newer ? 'NEW' : '' });
     if (newer) await chrome.action.setBadgeBackgroundColor({ color: '#ED2590' });
-  requestBrowserUpdate();ome.runtime.onStartup.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
+  } catch (_) {}
+}
+chrome.runtime.onUpdateAvailable.addListener(() => chrome.runtime.reload());
+chrome.runtime.onInstalled.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
+chrome.runtime.onStartup.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name !== UPDATE_ALARM) return;
   void checkReleaseBadge();
-  try {
-    chrome.runtime.requestUpdateCheck((status) => {
-      void chrome.runtime.lastError;
-      setUpdateBadge(status === 'update_available' ? 'NEW' : '');
-    });
-  } catch (_) {
-    // Browser may reject update checks while offline or during startup.
-  }
+  requestBrowserUpdate();
 });
-
-// Runtime message listener
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'download-file') {
-    chrome.downloads.download({
-      url: message.url,
-      filename: message.filename,
-      saveAs: false
-    }, (downloadId) => {
-      const error = chrome.runtime.lastError;
-      if (error || typeof downloadId !== 'number') {
-        sendResponse({
-          success: false,
-          error: error ? error.message : 'Browser did not create download'
-        });
-        return;
-      }
-      sendResponse({ success: true, downloadId });
-    });
-    return true;
-  }
+  if (message.action !== 'download-file') return;
+  chrome.downloads.download({ url: message.url, filename: message.filename, saveAs: false }, (downloadId) => {
+    const error = chrome.runtime.lastError;
+    if (error || typeof downloadId !== 'number') {
+      sendResponse({ success: false, error: error ? error.message : 'Browser did not create download' });
+      return;
+    }
+    sendResponse({ success: true, downloadId });
+  });
+  return true;
 });
-
 console.log('[Lobnho Background] Service Worker initialized');
