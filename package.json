@@ -3,6 +3,9 @@
   "version": "1.1.8",
   "description": "Browser extension for developers and designers: element inspection, React JSX and Tailwind CSS code generation, and single-file page export.",
   "main": "manifest.json",
+  "scripts": {
+    "test": "node tests/run-tests.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/lobnho/lobnho-extensao.git"

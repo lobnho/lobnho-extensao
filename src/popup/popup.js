@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const updateBox = document.getElementById('extension-update');
   const updateText = document.getElementById('extension-update-text');
   const updateLink = document.getElementById('extension-update-link');
-  const installedVersion = (typeof chrome !== 'undefined' && chrome.runtime?.getManifest?.()?.version) || '1.1.8';
+  const installedVersion = chrome.runtime?.getManifest?.()?.version || '1.1.8';
   const versionEndpoint = 'https://lobinho.eu/extension/version.json';
 
   const headerVersionEl = document.querySelector('.orkut-version');
