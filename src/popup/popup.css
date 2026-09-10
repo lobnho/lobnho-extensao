@@ -147,22 +147,39 @@ button {
   background: #4B6FA9;
 }
 
-/* Footer */
 .orkut-update {
-  margin: 10px 14px 0;
-  padding: 8px 10px;
-  border: 1px solid #ff00f655;
-  border-radius: 8px;
-  color: #ffd7fb;
+  margin: 10px 14px 4px;
+  padding: 10px 12px;
+  background: #F4F7FB;
+  border: 1px solid #3B5998;
+  border-left: 4px solid #ED2590;
+  border-radius: 6px;
+  color: #29487D;
   font-size: 11px;
   line-height: 1.4;
 }
 
-.orkut-update a {
+.orkut-update span {
   display: block;
-  margin-top: 4px;
-  color: #ff98fb;
-  font-weight: 700;
+  font-weight: 600;
+  color: #29487D;
+}
+
+.orkut-update a {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  background: #ED2590;
+  color: #ffffff;
+  border-radius: 4px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 11px;
+  transition: background 0.15s ease;
+}
+
+.orkut-update a:hover {
+  background: #D42880;
 }
 
 .orkut-popup-footer {
