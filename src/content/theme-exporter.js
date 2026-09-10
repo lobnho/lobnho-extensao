@@ -125,14 +125,22 @@
       const textColors = sortedColors.filter((c) => c.types.has('text'));
       const borderList = sortedColors.filter((c) => c.types.has('border'));
 
+      const bgColor = bgColors[0] ? bgColors[0].color : '#ffffff';
+      const surfaceColor = bgColors[1] ? bgColors[1].color : '#f8f9fa';
+      const primaryColor = bgColors.find((c) => c.color !== '#ffffff' && c.color !== '#000000' && c.color !== 'rgb(255, 255, 255)' && c.color !== 'rgb(0, 0, 0)')?.color || '#ff00f6';
+      const secondaryColor = bgColors.find((c) => c.color !== primaryColor && c.color !== bgColor && c.color !== surfaceColor)?.color || '#3b82f6';
+      const textColor = textColors[0] ? textColors[0].color : '#111827';
+      const textMutedColor = textColors[1] ? textColors[1].color : '#6b7280';
+      const borderColor = borderList[0] ? borderList[0].color : '#e5e7eb';
+
       const palette = {
-        background: bgColors[0] ? bgColors[0].color : '#ffffff',
-        surface: bgColors[1] ? bgColors[1].color : '#f8f9fa',
-        primary: bgColors.find((c) => c.color !== '#ffffff' && c.color !== '#000000' && c.color !== 'rgb(255, 255, 255)' && c.color !== 'rgb(0, 0, 0)')?.color || '#ff00f6',
-        secondary: bgColors.find((c) => c.color !== palette.primary && c.color !== palette.background && c.color !== palette.surface)?.color || '#3b82f6',
-        text: textColors[0] ? textColors[0].color : '#111827',
-        textMuted: textColors[1] ? textColors[1].color : '#6b7280',
-        border: borderList[0] ? borderList[0].color : '#e5e7eb',
+        background: bgColor,
+        surface: surfaceColor,
+        primary: primaryColor,
+        secondary: secondaryColor,
+        text: textColor,
+        textMuted: textMutedColor,
+        border: borderColor,
         gradients: Array.from(gradients).slice(0, 5)
       };
 
