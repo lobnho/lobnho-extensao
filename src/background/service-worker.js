@@ -24,7 +24,8 @@ async function checkReleaseBadge() {
     const current = chrome.runtime.getManifest().version.split('.').map(Number);
     const remote = String(release.version || '').split('.').map(Number);
     const newer = remote.length === 3 && remote.some((value, index) => value > (current[index] || 0)) && remote.every((value, index) => value >= (current[index] || 0));
-    setUpdateBadge(newer ? 'NEW' : '');
+    await chrome.action.setBadgeText({ text: newer ? 'NEW' : '' });
+    if (newer) await chrome.action.setBadgeBackgroundColor({ color: '#ED2590' });
   } catch (_) {
     // Network failure must not affect extension runtime.
   }
@@ -38,7 +39,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   try {
     chrome.runtime.requestUpdateCheck((status) => {
       void chrome.runtime.lastError;
-      if (status === 'update_available') setUpdateBadge('NEW');
+      setUpdateBadge(status === 'update_available' ? 'NEW' : '');
     });
   } catch (_) {
     // Browser may reject update checks while offline or during startup.
