@@ -24,8 +24,7 @@ async function checkReleaseBadge() {
     const current = chrome.runtime.getManifest().version.split('.').map(Number);
     const remote = String(release.version || '').split('.').map(Number);
     const newer = remote.length === 3 && remote.some((value, index) => value > (current[index] || 0)) && remote.every((value, index) => value >= (current[index] || 0));
-    await chrome.action.setBadgeText({ text: newer ? 'NEW' : '' });
-    if (newer) await chrome.action.setBadgeBackgroundColor({ color: '#ED2590' });
+    setUpdateBadge(newer ? 'NEW' : '');
   } catch (_) {
     // Network failure must not affect extension runtime.
   }
