@@ -1,4 +1,4 @@
-﻿name: Release Extension Package
+name: Release Extension Package
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       - name: Create Clean ZIP Distribution Package
         run: |
           mkdir -p dist
-          zip -r dist/lobnho-extension.zip manifest.json package.json LICENSE README.md assets src -x "*.git*"
+          zip -r dist/lobnho-extension.zip manifest.json LICENSE README.md assets src -x "*.git*"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
