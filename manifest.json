@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Lobnho Extension — Inspector & Exporter",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Lobnho element inspector, visual tracker, and multi-format page exporter for Figma and Adobe workflows.",
   "permissions": [
     "activeTab",
