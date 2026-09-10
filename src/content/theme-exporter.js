@@ -216,6 +216,84 @@
         tailwindConfig
       };
     }
+
+    // High-fidelity extractor overrides legacy sampling implementation above.
+    static extractTheme(doc = document) {
+      const computed = (el) => el ? window.getComputedStyle(el) : null;
+      const cleanColor = (value, fallback = null) => {
+        if (!value || value === 'transparent' || /rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/i.test(value)) return fallback;
+        const raw = String(value).trim();
+        if (!/(oklab|oklch|color\()/i.test(raw)) return raw.toLowerCase();
+        try {
+          const canvas = doc.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = raw;
+          const parsed = ctx.fillStyle;
+          if (parsed && !/(oklab|oklch|color\()/i.test(parsed)) return parsed.toLowerCase();
+        } catch (_) { /* DOM fallback unavailable */ }
+        const probe = doc.createElement('span');
+        probe.style.color = raw;
+        probe.style.position = 'fixed';
+        probe.style.visibility = 'hidden';
+        doc.body.appendChild(probe);
+        const parsed = computed(probe).color;
+        probe.remove();
+        return parsed && !/(oklab|oklch|color\()/i.test(parsed) ? parsed.toLowerCase() : fallback;
+      };
+      const normalizeRadius = (value) => {
+        if (!value || value === '0px') return value || '0px';
+        return /e[+-]?\d+/i.test(value) || parseFloat(value) >= 999 ? '9999px' : value;
+      };
+      const cleanShadow = (value) => {
+        if (!value || value === 'none') return null;
+        const layers = value.split(/,(?![^()]*\))/).map((layer) => layer.trim());
+        const visible = layers.filter((layer) => !/rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)\s+0px\s+0px\s+0px\s+0px/i.test(layer));
+        return visible.length ? visible.join(', ') : null;
+      };
+      const metrics = (style) => ({
+        height: style.height,
+        minWidth: style.minWidth,
+        paddingX: style.paddingLeft,
+        paddingY: style.paddingTop
+      });
+      const styleToken = (el) => {
+        const s = computed(el);
+        return { background: cleanColor(s.backgroundColor), color: cleanColor(s.color), border: `${s.borderWidth} ${s.borderStyle} ${cleanColor(s.borderColor)}`, borderRadius: normalizeRadius(s.borderRadius), boxShadow: cleanShadow(s.boxShadow), backdropFilter: s.backdropFilter !== 'none' ? s.backdropFilter : null, transitionDuration: s.transitionDuration, transitionTimingFunction: s.transitionTimingFunction, transitionProperty: s.transitionProperty, ...metrics(s) };
+      };
+      const elements = Array.from(doc.querySelectorAll('*')).filter((el) => { const s = computed(el); return s && s.display !== 'none' && s.visibility !== 'hidden' && !['SCRIPT', 'STYLE', 'SVG'].includes(el.tagName); });
+      const body = doc.body;
+      const roots = [doc.documentElement, body, doc.querySelector('#__next'), doc.querySelector('main')].filter(Boolean);
+      const rootStyles = roots.map(computed).filter(Boolean);
+      const bgCandidates = rootStyles.map((s) => cleanColor(s.backgroundColor)).filter(Boolean);
+      const darkRoot = rootStyles.find((s) => { const c = cleanColor(s.backgroundColor); return c && !/^rgb\(255, 255, 255\)$|^#fff(?:fff)?$/i.test(c); });
+      const colors = new Map();
+      const gradients = new Set();
+      const addColor = (value, type) => { const color = cleanColor(value); if (!color) return; const item = colors.get(color) || { color, count: 0, types: new Set() }; item.count++; item.types.add(type); colors.set(color, item); };
+      elements.slice(0, 1200).forEach((el) => { const s = computed(el); addColor(s.color, 'text'); addColor(s.backgroundColor, 'bg'); addColor(s.borderColor, 'border'); if (s.backgroundImage.includes('gradient')) gradients.add(s.backgroundImage); });
+      const sorted = Array.from(colors.values()).sort((a, b) => b.count - a.count);
+      const byType = (type) => sorted.filter((x) => x.types.has(type));
+      const backgrounds = byType('bg');
+      const background = cleanColor(darkRoot && darkRoot.backgroundColor) || bgCandidates.find((c) => c !== '#ffffff' && c !== 'rgb(255, 255, 255)') || backgrounds[0]?.color || '#ffffff';
+      const surface = backgrounds.find((x) => x.color !== background)?.color || background;
+      const buttons = elements.filter((el) => el.matches('button, [role="button"], a.btn, a[class*="btn"]')).map((el) => ({ element: el, style: styleToken(el) }));
+      const uniqueButtons = []; const seenButtons = new Set(); buttons.forEach((item) => { const key = JSON.stringify(item.style); if (!seenButtons.has(key)) { seenButtons.add(key); uniqueButtons.push(item); } });
+      const primary = uniqueButtons.sort((a, b) => (b.style.background && b.style.background !== 'rgba(0, 0, 0, 0)' ? 1 : 0) - (a.style.background && a.style.background !== 'rgba(0, 0, 0, 0)' ? 1 : 0))[0]?.style || null;
+      const secondary = uniqueButtons.find((item) => JSON.stringify(item.style) !== JSON.stringify(primary))?.style || null;
+      const card = elements.filter((el) => /card|panel|tile|surface/i.test(String(el.className))).map((el) => styleToken(el))[0] || null;
+      const nav = doc.querySelector('nav, header, [role="navigation"]');
+      const scale = {}; ['h1','h2','h3','h4','h5','h6'].forEach((tag) => { const el = doc.querySelector(tag); const s = computed(el); scale[tag] = s ? { fontSize: s.fontSize, lineHeight: s.lineHeight, fontWeight: s.fontWeight } : null; });
+      const bodyStyle = computed(body); scale.body = bodyStyle ? { fontSize: bodyStyle.fontSize, lineHeight: bodyStyle.lineHeight, fontWeight: bodyStyle.fontWeight } : null;
+      const families = elements.map((el) => computed(el).fontFamily?.split(',')[0].trim().replace(/["']/g, '')).filter(Boolean); const familyCounts = families.reduce((m, f) => m.set(f, (m.get(f) || 0) + 1), new Map()); const brandFont = Array.from(familyCounts.entries()).sort((a,b) => b[1]-a[1])[0]?.[0] || 'sans-serif';
+      const transitions = elements.map((el) => computed(el)).filter((s) => s.transitionProperty !== 'none' && s.transitionDuration !== '0s').slice(0, 10).map((s) => ({ property: s.transitionProperty, duration: s.transitionDuration, timingFunction: s.transitionTimingFunction }));
+      const keyframes = Array.from(doc.styleSheets).flatMap((sheet) => { try { return Array.from(sheet.cssRules || []).filter((r) => r.type === CSSRule.KEYFRAMES_RULE).map((r) => r.name); } catch (_) { return []; } });
+      const palette = { background, surface, primary: backgrounds.find((x) => x.color !== background && x.color !== surface)?.color || '#ff00f6', secondary: backgrounds.find((x) => x.color !== background && x.color !== surface)?.color || '#3b82f6', text: byType('text')[0]?.color || '#111827', textMuted: byType('text')[1]?.color || '#6b7280', border: byType('border')[0]?.color || '#e5e7eb', gradients: Array.from(gradients).slice(0, 10) };
+      const typography = { brandFont, fontFamilies: [brandFont], scale };
+      const components = { buttons: { primary, secondary }, card, navbar: nav ? { height: computed(nav).height, background: cleanColor(computed(nav).backgroundColor), borderBottom: `${computed(nav).borderBottomWidth} ${computed(nav).borderBottomStyle} ${cleanColor(computed(nav).borderBottomColor)}` } : null, containers: { maxWidths: Array.from(new Set(elements.map((el) => computed(el).maxWidth).filter((v) => v && v !== 'none' && v !== '100%'))).slice(0, 10) } };
+      const effects = { glassmorphism: elements.filter((el) => computed(el).backdropFilter !== 'none').slice(0, 10).map((el) => ({ selector: el.tagName.toLowerCase(), backdropFilter: computed(el).backdropFilter })), transitions, keyframes: Array.from(new Set(keyframes)).slice(0, 20) };
+      const cssVariablesBlock = `:root {\n  --theme-primary: ${palette.primary};\n  --theme-secondary: ${palette.secondary};\n  --theme-background: ${palette.background};\n  --theme-surface: ${palette.surface};\n  --theme-text: ${palette.text};\n  --theme-text-muted: ${palette.textMuted};\n  --theme-border: ${palette.border};\n  --theme-font-brand: ${brandFont};\n}`;
+      const tailwindConfig = { theme: { extend: { colors: { primary: palette.primary, secondary: palette.secondary, background: palette.background, surface: palette.surface, textMain: palette.text, textMuted: palette.textMuted, border: palette.border }, fontFamily: { brand: [brandFont] } } } };
+      return { meta: { site: window.location.hostname, url: window.location.href, extractedAt: new Date().toISOString(), generator: 'Lobnho Extension Theme Exporter v1.1.8' }, palette, typography, components, effects, tokens: { palette, typography, components }, cssVariablesBlock, tailwindConfig };
+    }
   }
 
   global.LobnhoThemeExporter = LobnhoThemeExporter;

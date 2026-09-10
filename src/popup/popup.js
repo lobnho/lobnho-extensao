@@ -11,8 +11,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   const updateBox = document.getElementById('extension-update');
   const updateText = document.getElementById('extension-update-text');
   const updateLink = document.getElementById('extension-update-link');
-  const installedVersion = '1.1.8';
+  const installedVersion = (typeof chrome !== 'undefined' && chrome.runtime?.getManifest?.()?.version) || '1.1.8';
   const versionEndpoint = 'https://lobinho.eu/extension/version.json';
+
+  const headerVersionEl = document.querySelector('.orkut-version');
+  if (headerVersionEl) {
+    headerVersionEl.textContent = `v${installedVersion}`;
+  }
+
+  function isNewerVersion(remote, local) {
+    const r = (remote || '').split('.').map(n => parseInt(n, 10) || 0);
+    const l = (local || '').split('.').map(n => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(r.length, l.length); i++) {
+      const rv = r[i] || 0;
+      const lv = l[i] || 0;
+      if (rv > lv) return true;
+      if (rv < lv) return false;
+    }
+    return false;
+  }
 
   async function checkForUpdate() {
     try {
@@ -22,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       clearTimeout(timeout);
       if (!response.ok) return;
       const release = await response.json();
-      if (release.version && release.version !== installedVersion && release.downloadUrl) {
+      if (release.version && isNewerVersion(release.version, installedVersion) && release.downloadUrl) {
         updateText.textContent = `Nova versão disponível: v${release.version}`;
         updateLink.href = release.releaseUrl || release.downloadUrl;
         updateBox.hidden = false;
