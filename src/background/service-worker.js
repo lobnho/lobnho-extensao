@@ -16,6 +16,17 @@ function scheduleUpdateCheck() {
   chrome.alarms.create(UPDATE_ALARM, { delayInMinutes: UPDATE_INTERVAL_MINUTES, periodInMinutes: UPDATE_INTERVAL_MINUTES });
 }
 
+function requestBrowserUpdate() {
+  try {
+    chrome.runtime.requestUpdateCheck((status) => {
+      void chrome.runtime.lastError;
+      setUpdateBadge(status === 'update_available' ? 'NEW' : '');
+    });
+  } catch (_) {
+    // Browser may reject update checks while offline or during startup.
+  }
+}
+
 async function checkReleaseBadge() {
   try {
     const response = await fetch(`${RELEASE_URL}?v=${Date.now()}`, { cache: 'no-store' });
@@ -27,14 +38,7 @@ async function checkReleaseBadge() {
     const newer = remote.length === 3 && remote.every(Number.isFinite) && firstDifference !== undefined && remote[firstDifference] > (current[firstDifference] || 0);
     await chrome.action.setBadgeText({ text: newer ? 'NEW' : '' });
     if (newer) await chrome.action.setBadgeBackgroundColor({ color: '#ED2590' });
-  } catch (_) {
-    // Network failure must not affect extension runtime.
-  }
-}
-
-chrome.runtime.onUpdateAvailable.addListener(() => chrome.runtime.reload());
-chrome.runtime.onInstalled.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
-chrome.runtime.onStartup.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
+  requestBrowserUpdate();ome.runtime.onStartup.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name !== UPDATE_ALARM) return;
   void checkReleaseBadge();
