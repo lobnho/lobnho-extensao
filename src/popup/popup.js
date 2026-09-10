@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const release = await response.json();
       if (release.version && isNewerVersion(release.version, installedVersion) && release.downloadUrl) {
         updateText.textContent = `Nova versão disponível: v${release.version}`;
-        updateLink.href = release.releaseUrl || release.downloadUrl;
+        updateLink.href = 'https://lobinho.eu/extension/';
         updateBox.hidden = false;
       }
     } catch {

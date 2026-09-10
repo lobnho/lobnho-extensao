@@ -32,6 +32,7 @@ async function checkReleaseBadge() {
   }
 }
 
+chrome.runtime.onUpdateAvailable.addListener(() => chrome.runtime.reload());
 chrome.runtime.onInstalled.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
 chrome.runtime.onStartup.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
 chrome.alarms.onAlarm.addListener((alarm) => {
