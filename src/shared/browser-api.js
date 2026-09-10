@@ -86,6 +86,7 @@
               'src/content/target-cursor.js',
               'src/content/inspector-modal.js',
               'src/content/page-exporter.js',
+              'src/content/theme-exporter.js',
               'src/content/content-main.js'
             ]
           }, () => {

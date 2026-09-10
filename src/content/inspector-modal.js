@@ -367,15 +367,17 @@
       const fontDetails = this._extractFontDetails(element, style);
       cssRules.push('', '/* Typography & Font Detection */');
       fontDetails.activeFonts.forEach((f) => {
-        cssRules.push(`font-family-check: "${f.name}" -> Loaded: ${f.isLoaded ? 'YES' : 'NO'}${f.isSystem ? ' (System Font)' : ' (Web Font)'}`);
+        const status = f.isLoaded ? 'carregada' : 'não carregada';
+        const kind = f.isSystem ? 'fonte do sistema' : 'webfont';
+        cssRules.push(`/* Fonte ativa: ${f.name} (${status}; ${kind}) */`);
       });
       if (fontDetails.fontFaceUrls.length) {
-        cssRules.push('/* WebFont @font-face URLs */');
-        fontDetails.fontFaceUrls.forEach((u) => cssRules.push(`font-url: ${u}`));
+        cssRules.push('/* WebFont URLs (@font-face) */');
+        fontDetails.fontFaceUrls.forEach((u) => cssRules.push(`/* WebFont URL: ${u} */`));
       }
       if (fontDetails.googleFontLinks.length) {
         cssRules.push('/* Google Fonts Links */');
-        fontDetails.googleFontLinks.forEach((l) => cssRules.push(`google-font: ${l}`));
+        fontDetails.googleFontLinks.forEach((l) => cssRules.push(`/* Google Font URL: ${l} */`));
       }
       this.tabsData.css = cssRules.join('\n');
 

@@ -12,22 +12,34 @@
 
       const blob = new Blob([JSON.stringify(themeData, null, 2)], { type: 'application/json' });
       const filename = `${hostname}-theme.json`;
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('Could not encode theme file'));
+        reader.readAsDataURL(blob);
+      });
 
-      if (global.LobnhoBrowser && global.LobnhoBrowser.downloads && global.LobnhoBrowser.downloads.download) {
-        const url = URL.createObjectURL(blob);
-        await global.LobnhoBrowser.downloads.download({
-          url,
-          filename,
-          saveAs: true
-        });
-      } else {
+      let downloaded = false;
+      if (global.LobnhoBrowser && global.LobnhoBrowser.runtime && global.LobnhoBrowser.runtime.sendMessage) {
+        try {
+          const response = await global.LobnhoBrowser.runtime.sendMessage({
+            action: 'download-file',
+            url: dataUrl,
+            filename
+          });
+          downloaded = Boolean(response && response.success);
+        } catch {
+          downloaded = false;
+        }
+      }
+
+      if (!downloaded) {
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        a.href = dataUrl;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(a.href), 10000);
       }
 
       return themeData;
