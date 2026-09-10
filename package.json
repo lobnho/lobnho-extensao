@@ -1,6 +1,6 @@
 {
   "name": "lobnho-extensao",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Browser extension for developers and designers: element inspection, React JSX and Tailwind CSS code generation, and single-file page export.",
   "main": "manifest.json",
   "scripts": {

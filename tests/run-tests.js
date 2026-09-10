@@ -26,4 +26,9 @@ assert(manifest.update_url === 'https://lobinho.eu/extension/updates.xml', 'mani
 assert(manifest.permissions.includes('alarms'), 'manifest must grant alarms permission');
 assert(serviceWorker.includes('requestUpdateCheck'), 'service worker must request browser updates');
 assert(serviceWorker.includes('periodInMinutes: UPDATE_INTERVAL_MINUTES'), 'service worker must schedule periodic update checks');
+assert(serviceWorker.includes("https://lobinho.eu/extension/version.json"), 'service worker must check release metadata');
+assert(serviceWorker.includes("text: newer ? 'NEW' : ''"), 'service worker must show NEW badge for newer release');
+assert(serviceWorker.includes("#ED2590"), 'new release badge must use pink branding');
+assert(exporter.includes('MAX_ELEMENTS = 2500'), 'theme exporter must cap DOM scanning');
+assert(exporter.includes('darkGradient') && exporter.includes('darkScheme'), 'theme exporter must preserve dark backgrounds');
 console.log('Extension focused tests: PASS');

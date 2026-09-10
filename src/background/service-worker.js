@@ -4,19 +4,42 @@
  */
 
 const UPDATE_ALARM = 'lobnho-extension-update-check';
-const UPDATE_INTERVAL_MINUTES = 120;
+const UPDATE_INTERVAL_MINUTES = 60;
+
+function setUpdateBadge(text) {
+  chrome.action.setBadgeText({ text }).catch(() => {});
+  if (text) chrome.action.setBadgeBackgroundColor({ color: '#ff00f6' }).catch(() => {});
+}
+const RELEASE_URL = 'https://lobinho.eu/extension/version.json';
 
 function scheduleUpdateCheck() {
   chrome.alarms.create(UPDATE_ALARM, { delayInMinutes: UPDATE_INTERVAL_MINUTES, periodInMinutes: UPDATE_INTERVAL_MINUTES });
 }
 
-chrome.runtime.onInstalled.addListener(scheduleUpdateCheck);
-chrome.runtime.onStartup.addListener(scheduleUpdateCheck);
+async function checkReleaseBadge() {
+  try {
+    const response = await fetch(`${RELEASE_URL}?v=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) return;
+    const release = await response.json();
+    const current = chrome.runtime.getManifest().version.split('.').map(Number);
+    const remote = String(release.version || '').split('.').map(Number);
+    const newer = remote.length === 3 && remote.some((value, index) => value > (current[index] || 0)) && remote.every((value, index) => value >= (current[index] || 0));
+    await chrome.action.setBadgeText({ text: newer ? 'NEW' : '' });
+    if (newer) await chrome.action.setBadgeBackgroundColor({ color: '#ED2590' });
+  } catch (_) {
+    // Network failure must not affect extension runtime.
+  }
+}
+
+chrome.runtime.onInstalled.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
+chrome.runtime.onStartup.addListener(() => { scheduleUpdateCheck(); void checkReleaseBadge(); });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name !== UPDATE_ALARM) return;
+  void checkReleaseBadge();
   try {
-    chrome.runtime.requestUpdateCheck(() => {
+    chrome.runtime.requestUpdateCheck((status) => {
       void chrome.runtime.lastError;
+      if (status === 'update_available') setUpdateBadge('NEW');
     });
   } catch (_) {
     // Browser may reject update checks while offline or during startup.
